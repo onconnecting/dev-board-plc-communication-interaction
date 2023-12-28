@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manual Mode Control</title>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var manualModeCheckbox = document.getElementById("manualMode");
+            var inductiveSensorCheckbox = document.getElementById("inductiveSensor");
+            var distanceSensorSlider = document.getElementById("distanceSensor");
+            var debounceTimer;
+
+            manualModeCheckbox.addEventListener("change", updateSettings);
+            inductiveSensorCheckbox.addEventListener("change", updateSettings);
+            distanceSensorSlider.addEventListener("input", () => debounce(updateSettings, 500));
+
+            function updateSettings() {
+                var isManualMode = manualModeCheckbox.checked;
+                inductiveSensorCheckbox.disabled = !isManualMode;
+                distanceSensorSlider.disabled = !isManualMode;
+
+                // Make a request to the backend
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "/update-settings", true);
+                xhr.setRequestHeader("Content-Type", "application/json");
+                xhr.send(JSON.stringify({
+                    manualMode: isManualMode,
+                    inductiveSensor: inductiveSensorCheckbox.checked,
+                    distanceSensor: distanceSensorSlider.value
+                }));
+            }
+
+            function debounce(func, delay) {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(func, delay);
+            }
+        });
+    </script>
+</head>
+<body>
+<h1>Control Panel</h1>
+<form>
+    <label><input type="checkbox" id="manualMode"> Activate Manual Mode</label><br>
+    <label><input type="checkbox" id="inductiveSensor" disabled> Inductive Sensor</label><br>
+    <label>Distance Sensor: <input type="range" id="distanceSensor" min="0" max="20" disabled></label>
+</form>
+</body>
+</html>
